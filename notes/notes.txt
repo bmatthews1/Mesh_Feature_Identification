@@ -40,6 +40,7 @@ A stretch goal would be to have the visualization to have some basic bells and w
 
 Ideally I would prefer to do this visualization in native Javascript/webgl, but if that becomes a time constraint, I will default back to the provided react/THREE.js app
 
+Ideally it would be nice to provide controls and visualization for the latice spacing and bevel threashholding as well.
 
 UI:
 ---

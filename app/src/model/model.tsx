@@ -21,9 +21,14 @@ export const Model = (): JSX.Element => {
                 if (element.type !== 'Mesh') return;
 
                 const meshElement = element as THREE.Mesh;
+                const mat         = meshElement.material as THREE.MeshStandardMaterial;
+
+                let col = ["r", "g", "b"].map(e => Math.floor(mat.color[e]*256));
+
+                console.log(`rgb(${col[0]}, ${col[1]}, ${col[2]})`);
                 newModuleEntities.push({
                     bufferGeometry: meshElement.geometry as THREE.BufferGeometry,
-                    color: 'rgb(120, 120, 120)',
+                    color: `rgb(${col[0]}, ${col[1]}, ${col[2]})`,
                 });
             });
             setModelEnts(newModuleEntities);
