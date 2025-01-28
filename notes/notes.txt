@@ -34,11 +34,16 @@ Proposed Algorithm for Feature Detection:
 
 Visualization:
 --------------
-It should be relatively straight-forward to create a Three.js app (or another webgl) based app to visualize the 3D data. At the base level the visualization should support a 3D camera, Orbit and movement controls, an Id->color visualizer, and a way to identify pockets (maybe a glow, outline, or different coloring scheme)
+It should be relatively straight-forward to create a Three.js app (or another webgl based app) to visualize the 3D data. At the base level the visualization should support a 3D camera, Orbit and movement controls, an Id->color visualizer, and a way to identify pockets (maybe a glow, outline, or different coloring scheme)
 
 A stretch goal would be to have the visualization to have some basic bells and whistles as well, such as environment mapping to get a metallic surface, shadows, basic shading, or ray traced graphics.
 
 Ideally I would prefer to do this visualization in native Javascript/webgl, but if that becomes a time constraint, I will default back to the provided react/THREE.js app
+
+
+UI:
+---
+There will need to be some sort of UI to navigate through the identified pockets. The easiest would be a native html list of face groups along with their assosiated face Ids. If clicked, this list should focus the camera on that group (which could be accomplished with a "lookat" matrix).
 
 
 
