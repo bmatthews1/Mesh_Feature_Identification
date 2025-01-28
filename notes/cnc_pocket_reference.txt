@@ -1,0 +1,14 @@
+from: https://www.google.com/search?q=what+is+a+pocket+in+machinin
+
+In machining, a "pocket" refers to a cavity or depression milled into a workpiece, essentially a hollow area within the material created by removing material using a cutting tool like an end mill, typically with a closed boundary on the sides, allowing for the creation of features like recesses or slots within a part. [1, 2, 3, 4]  
+Key points about pockets in machining: [1, 2, 3]  
+
+• Process: This operation is called "pocket milling" and is commonly performed on CNC machines where the toolpath is programmed to cut material within a defined boundary to create the pocket. [1, 2, 3]  
+• Depth: Pockets can be milled to a specific depth, either fully through the workpiece or just a partial depth depending on the desired feature. [1, 2, 4]  
+• Closed boundary: A defining characteristic of a pocket is that it usually has a closed boundary, meaning the sides of the cavity are enclosed by the machined material. [2, 4, 5]  
+• Applications: Pockets are used in various applications to create features like screw heads, mounting holes, or complex internal shapes in a part. [1, 3, 4]  
+
+
+Generative AI is experimental.
+
+[1] https://www.datron.com/resources/blog/what-is-pocket-milling-and-deep-milling/[2] https://sites.wit.edu/soad-labs/cnc-milling-2-axis-operations-pocketing/[3] https://bobcad.com/cnc-software-what-is-pocket-milling/[4] https://www.cnccookbook.com/can-figure-tool-use-cnc-mill-router-part-3-pocketing/[5] https://help.autodesk.com/view/fusion360/ENU/?guid=GUID67DC60DE-EE42-4BC4-B50D-B28D938D146E

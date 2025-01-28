@@ -1,0 +1,45 @@
+Ben's Notes:
+============
+
+The Problem (Re)Statement:
+--------------------------
+Given the input glb file and a list of face adjacency information, identify "pockets" in the geometry. Report these pockets as a collection of face Id's. Additionally, visualize these pockets on the 3D model in some manner so that they can be visually identified.
+
+
+First Impressions:
+------------------
+What immediatly stands out to me is what the definition of a "pocket" is. Topologically there is no objective difference between a pocket and a small divot or dip in the surface. In this sense I feel like there are a few immediate edge cases to look out for, such as *bevels*, *depressions*, and *saddles* in the shape.
+
+I'm assuming that in the world of CNC machining, a "pocket" has a very precise definition. Based on a cursory google search, it seems a "pocket" is any cavity or depression in a shape that can be removed through milling (see cnc_pocket_reference.txt). Additionally, sources specify that these pockets generally (but not always) comprise a closed "boundary" on the sides - which would eliminate the need to check for saddles.
+
+
+Proposed Algorithm for Feature Detection:
+-----------------------------------------
+    - Step 1.) Identify Pocket Faces
+        In this step, we can cast a lattice of "rays" through the volume of the shape where the direction of each ray on the lattice is one of the 3 primary ortho-normal vectors. To identify each face that is part of a pocket, we first intersect the rays with the faces of the model to produce intersection points along the ray. By then sorting these "intersection points" by distance to the ray origin, we can identify cavities along the ray by the alternating pattern of points that "enter" the shape, followed by points that "leave" the shape (of which there must always be an even number [add check]). E.g. in the points ["enter", "leave", "enter", "leave"], the middle two points would comprise faces that form a pocket.
+
+        Issues and Edge Cases:
+        ----------------------
+        One problem with this approach is that it is resolution dependant. If the pocketsize is smaller than the largest gap between rays on our lattice, then the rays have a chance of missing the pocket entirely.
+
+    - Step 2.) Combine Pocket Faces
+        Now that we have a list of faces that form pockets, we can use the face adjacency information provided to "stitch" adjacent faces into closed boundaries. If no adjacency information is provided then there will need to be an additional step to generate that information. 
+        
+        A fast algorithm for performing this computation would be to employ a lookup table or some type of space splitting algorithm such as oct-trees. For the purposes of this demo, a double for loop with removal over all the identified faces should be sufficient.
+        
+        Issues and Edge Cases:
+        ----------------------
+        A large problem that I can see happening in this case is a situation where two seperate pockets get marked as the same pocket by virtue of sharing a shallow bevel or depression. In fact, any amound of shared edges between two pockets would be enough to allow this algorithm to mistake two pockets as one. One way to get around this issue might be to add some sort of threshholding that limits face adjacency based on the dot product between the normals of the faces (although this also seems prone to error)
+
+
+Visualization:
+--------------
+It should be relatively straight-forward to create a Three.js app (or another webgl) based app to visualize the 3D data. At the base level the visualization should support a 3D camera, Orbit and movement controls, an Id->color visualizer, and a way to identify pockets (maybe a glow, outline, or different coloring scheme)
+
+A stretch goal would be to have the visualization to have some basic bells and whistles as well, such as environment mapping to get a metallic surface, shadows, basic shading, or ray traced graphics.
+
+Ideally I would prefer to do this visualization in native Javascript/webgl, but if that becomes a time constraint, I will default back to the provided react/THREE.js app
+
+
+
+        
