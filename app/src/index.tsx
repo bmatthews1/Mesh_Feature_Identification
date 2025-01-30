@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Model } from './model/model';
+import App from './model/model';
 
-const App = () => (
-    <React.Fragment>
-        <span>Hello world</span>
-        <Model />
-    </React.Fragment>
-);
+// const App = () => (
+//     <React.Fragment>
+//         {/* <span>Hello world</span> */}
+//         <App />
+//     </React.Fragment>
+// );
 
 ReactDOM.render(
     <App />,
