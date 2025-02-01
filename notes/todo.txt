@@ -6,7 +6,7 @@ Create Standalone Node.js Web App:
         [ ] Add WebGL boilerplate
         [*] load and glb fil with GLTFLoader
         [ ] display model with vertex coloring
-        [ ] load JSON files
+        [*] load JSON files
         [ ] load and parse .cs file
 
     [ ] Main functionality
