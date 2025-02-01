@@ -4,7 +4,8 @@ Create Standalone Node.js Web App:
         [*] Add server.js
         [*] Import Three.js GLTFLoader
         [ ] Add WebGL boilerplate
-        [ ] load and display model with vertex coloring
+        [*] load and glb fil with GLTFLoader
+        [ ] display model with vertex coloring
         [ ] load JSON files
         [ ] load and parse .cs file
 

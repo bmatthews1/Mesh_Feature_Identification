@@ -2,6 +2,7 @@
 <html lang="en" >
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="#">
     <title>Hadrian Feature Identification</title>
     <style>
         * { margin:0; padding:0; } 
@@ -10,9 +11,14 @@
     </style>
 </head>
 <body>
-    <!-- https://stackoverflow.com/questions/64409605/how-do-i-load-gltfloader-from-a-cdn-three-js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js" integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg==" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>    
-    <script  src="./script.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+          }
+        }
+      </script>
+    <script type="module" src="./script.js"></script>
 </body>
 </html>
