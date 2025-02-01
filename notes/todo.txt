@@ -1,0 +1,15 @@
+Create Standalone Node.js Web App:
+--------------------------
+    [ ] App boilerplate
+        [*] Add server.js
+        [*] Import Three.js GLTFLoader
+        [ ] Add WebGL boilerplate
+        [ ] load and display model with vertex coloring
+        [ ] load JSON files
+        [ ] load and parse .cs file
+
+    [ ] Main functionality
+        [ ] GLTFLoader: Map faces -> Entity Id's -> Model Index 
+        [ ] Add algorithm to raycast through triangles
+            [ ] Flag each face as part of a pocket or not
+            [ ] Use loaded adjacency information to create pocket groups
