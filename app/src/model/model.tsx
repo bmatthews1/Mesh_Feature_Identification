@@ -3,13 +3,14 @@ import './model.css';
 import * as React from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas} from '@react-three/fiber';
 import { useLoader } from "@react-three/fiber";
 import { GLTFLoader } from 'three-stdlib';
-import { Suspense } from "react";
+import { Suspense} from "react";
 
 
 const Model = () => {
+
     const gltf = useLoader(GLTFLoader, "./colored_glb.glb");
     const material = new THREE.ShaderMaterial({
         vertexShader : `
@@ -47,13 +48,13 @@ const Model = () => {
 };
 
 export default function App() {
+
     return (
         <div className="App">
             <Canvas>
                 <Suspense fallback={null}>
-                    <Model />
-                    <OrbitControls />
-                    {/* <Environment preset="sunset" background /> */}
+                    <Model/>
+                    <OrbitControls/>
                 </Suspense>
             </Canvas>
         </div>
