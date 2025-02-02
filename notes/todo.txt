@@ -14,7 +14,7 @@ Create Standalone Node.js Web App:
             [*] Orbit
             [*] Zoom
             [ ] Pan
-            [ ] Camera automatically zooms to fit object in viewport (use gltf bouning regions)
+            [*] Camera automatically zooms to fit object in viewport (use gltf bouning regions)
         [ ] Menu and Interface
             [ ] Dropdown displaying Groups along with element information
             [ ] Click to select group on canvas
@@ -28,9 +28,12 @@ Create Standalone Node.js Web App:
 
     [ ] Refactor:
         [ ] Move webgl boilerplate code into its own js file
+        [ ] Add a "Mesh" class that can render individual meshes
+        [ ] Pull Camera "lookAt" code out into its own function
 
     [ ] Issues:
         [ ] Lighting calculations are currently incorrect (needs updating)
         [ ] Lighting has been disabled temporarily (due to vertexAttribIndex collisions from shader optimizations)
             [ ] Need to re-enable lighting and vertex normals
             [ ] Meed to rework the lighting calculations
+        [*] Camera Lookat math is incorrect (has weird z offset)

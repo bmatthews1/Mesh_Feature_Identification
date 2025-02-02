@@ -7,12 +7,23 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
         const modelPath = `${dataFolder}/colored_glb.glb`;
         const jsonFiles = ["adjacency_graph", "adjacency_graph_edge_metadata", "entity_geometry_info", "rgb_id_to_entity_id_map"];
 
-    //-- Three.js:
+    //-- GLTF:
         const loader = new GLTFLoader();
+
+    //-- Math Constants:
+        const PI = Math.PI;
+        const TAU = Math.PI*2;
+        const MAXVAL = Number.MAX_VALUE;
 
     //-- Data Containers:
         let gltfMeshes = [];
+        let modelBounds = [MAXVAL, MAXVAL, MAXVAL, -MAXVAL, -MAXVAL, -MAXVAL]; //xyz min, xyz max
+        let modelRadius = 0;
+        let modelCenter = [0, 0, 0];
         let jsonData = {};
+    
+    //-- Data Accessors:
+        const xyzSwizzle = ['x', 'y', 'z'];
 
 //-- Utils ------------------------------------------------
     let emptyFn = () => {};
@@ -29,22 +40,46 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
             gltf.scene.traverse(child => {
                 if (!child.isMesh) return;
+                if (idx == 0) console.log(child);
+
+                let geom = child.geometry;
+                let attributes = geom.attributes;
 
                 // retrieve geometry, id, and color information from gltf data
-                gltfMeshes.push({
+                let meshProxy = {
                     id : child.id,
-                    normals : [...child.geometry.attributes.normal.array],
-                    positions : [...child.geometry.attributes.position.array],
-                    faces : [...child.geometry.index.array],
+                    normals : [...attributes.normal.array],
+                    positions : [...attributes.position.array],
+                    faces : [...geom.index.array],
                     color : ["r", "g", "b"].map(e => child.material.color[e]),
                     idx : idx,
+                    bounds : [
+                        ...xyzSwizzle.map(e => geom.boundingBox.min[e]),
+                        ...xyzSwizzle.map(e => geom.boundingBox.max[e]),
+                    ],
                     name: child.name,
                     offset : offset,
-                });
+                };
+
+                gltfMeshes.push(meshProxy);
                 idx++;
                 offset += child.geometry.attributes.position.array.length/3;
+                
+                for (let i = 0; i < 6; i++){
+                    let fn = i < 3 ? Math.min : Math.max;
+                    modelBounds[i] = fn(modelBounds[i], meshProxy.bounds[i]);
+                };
             });
             console.log(gltfMeshes);
+            console.log(modelBounds);
+            modelRadius = Math.hypot(modelBounds[3]-modelBounds[0], modelBounds[4]-modelBounds[1], modelBounds[5]-modelBounds[2])/2;
+            modelCenter = [
+                (modelBounds[3]+modelBounds[0])/2, 
+                (modelBounds[4]+modelBounds[1])/2,
+                (modelBounds[5]+modelBounds[2])/2,
+            ];
+            console.log(modelRadius);
+            console.log(modelCenter);
             modelLoaded = true;
             checkGLReadyState();
         });
@@ -237,6 +272,7 @@ loadData();
 
 //-- Draw Setup ----------------------------
     let setVertexAttribute = (gl, attribute, location, numComponents, type=gl.FLOAT, normalize=false, stride=0, offset=0) => {
+        if (location == -1) return;
         gl.bindBuffer(gl.ARRAY_BUFFER, attribute);
         gl.vertexAttribPointer(location, numComponents, type, normalize, stride, offset);
         gl.enableVertexAttribArray(location);
@@ -251,7 +287,7 @@ loadData();
     let zoom   = 1.0;
     const fov  = Math.PI*.25;
     const near = 0.1;
-    const far  = 100.0;
+    const far  = 10000.0;
 
     let updateCamera = (gl) => {
         rotX += dRotX;
@@ -282,18 +318,19 @@ loadData();
         const projectionMatrix = mat4.create();
         mat4.perspective(projectionMatrix, fov, aspect, near, far);
 
-        // Set the drawing position to the "identity" point, which is
-        // the center of the scene.
+        // Set the drawing position to the "identity" point, which is the center of the scene.
         const modelViewMatrix = mat4.create();
-        translate(modelViewMatrix, [-0.0, 0.0, -6.0]);
 
-        let time = performance.now()/1000;
+        translate(modelViewMatrix, [0, 0, -modelRadius*2]);
 
-        // rotate(modelViewMatrix, rotY, [0, 0, 1]);
+        // rotate(modelViewMatrix, rotZ, [0, 0, 1]);
         rotate(modelViewMatrix, rotX, [1, 0, 0]);
         rotate(modelViewMatrix, rotY, [0, 1, 0]);
 
-        scale(modelViewMatrix, [zoom, zoom, zoom]);
+        let s = zoom;
+        scale(modelViewMatrix, [s, s, s]);
+
+        translate(modelViewMatrix, modelCenter.map(i => -i));
 
         //create a normals matrix
         const normalMatrix = mat4.create();
