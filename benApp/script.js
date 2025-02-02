@@ -1,6 +1,5 @@
 import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 //-- Globals ----------------------------------------------
     //-- File Path Constants:
@@ -25,16 +24,25 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
     let loadModel = (path) => {
         loader.load(path, gltf => {
+            let idx = 0;
+            let offset = 0;
+
             gltf.scene.traverse(child => {
                 if (!child.isMesh) return;
 
                 // retrieve geometry, id, and color information from gltf data
                 gltfMeshes.push({
                     id : child.id,
-                    normals : child.geometry.attributes.normal.array,
-                    positions : child.geometry.attributes.position.array,
-                    color : ["r", "g", "b"].map(e => child.material.color[e])
+                    normals : [...child.geometry.attributes.normal.array],
+                    positions : [...child.geometry.attributes.position.array],
+                    faces : [...child.geometry.index.array],
+                    color : ["r", "g", "b"].map(e => child.material.color[e]),
+                    idx : idx,
+                    name: child.name,
+                    offset : offset,
                 });
+                idx++;
+                offset += child.geometry.attributes.position.array.length/3;
             });
             console.log(gltfMeshes);
             modelLoaded = true;
@@ -85,17 +93,17 @@ loadData();
 
     let varying = `
         varying vec4 color;
-        varying vec3 vLighting;
+        // varying vec3 vLighting;
     `;
 
     const vert= `${shaderHeader}
         in vec4 aVertexPosition;
         in vec4 aVertexColor;
-        in vec3 aVertexNormal;
+        // in vec3 aVertexNormal;
 
         uniform   mat4 uModelViewMatrix;
         uniform   mat4 uProjectionMatrix;
-        uniform   mat4 uNormalMatrix;
+        // uniform   mat4 uNormalMatrix;
 
         uniform float time;
 
@@ -111,14 +119,14 @@ loadData();
             color         = aVertexColor;
             
             // lighting
-            highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
-            highp vec3 directionalLightColor = vec3(1, 1, 1);
-            highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
+            // highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+            // highp vec3 directionalLightColor = vec3(1, 1, 1);
+            // highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
 
-            highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+            // highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
 
-            highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-            vLighting = ambientLight + (directionalLightColor * directional);
+            // highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
+            // vLighting = ambientLight + (directionalLightColor * directional);
         }
     `;
 
@@ -130,82 +138,18 @@ loadData();
         void main() {
             //gl_FragColor = color;
 
-            fragColor = vec4(color.rgb*vLighting, 1.0);
+            // fragColor = vec4(color.rgb*vLighting, 1.0);
+            fragColor = vec4(color.rgb, 1.0);
+            // fragColor = vec4(1);
         }
     `
-
-//-- Geometry Definitions ------------------
-    /**
-     *    F ------- - G (-1, -1, -1)
-     *   /|          /|
-     *  / |         / |
-     * B --------- C  |
-     * |  |        |  | 
-     * |  E -------|- H
-     * | /         | /
-     * |/          |/
-     * A --------- D
-     * ^
-     * (1, 1, 1)
-     */
-
-    const CubePoints = {
-        A : [ 1,  1,  1],
-        B : [ 1, -1,  1],
-        C : [-1, -1,  1],
-        D : [-1,  1,  1],
-        E : [ 1,  1, -1],
-        F : [ 1, -1, -1],
-        G : [-1, -1, -1],
-        H : [-1,  1, -1],
-    }
-
-    let cubeVerts = [];
-    {
-        let {A, B, C, D, E, F, G, H} = CubePoints;
-        cubeVerts = [
-            A, B, D, C, //front
-            H, G, E, F, //back
-            E, F, A, B, //left
-            D, C, H, G, //right
-            B, F, C, G, //top
-            E, A, H, D, //bottom
-        ].flat();
-    }
-
-    let normals = [
-        [ 0,  0,  1], //front
-        [ 0,  0, -1], //back
-        [ 1,  0,  0], //left
-        [-1,  0,  0], //right
-        [ 0, -1,  0], //top
-        [ 0,  1,  0], //bottom
-    ];
-    normals = normals.map(i => (new Array(4)).fill(i)).flat(2);
-
-    // colors
-    const faceColors = [
-        [0.0, 1.0, 1.0, 1.0], // Front face: cyan
-        [1.0, 0.0, 0.0, 1.0], // Back face: red
-        [0.0, 1.0, 0.0, 1.0], // Top face: green
-        [0.0, 0.0, 1.0, 1.0], // Bottom face: blue
-        [1.0, 1.0, 0.0, 1.0], // Right face: yellow
-        [1.0, 0.0, 1.0, 1.0], // Left face: purple
-    ];
-    
-    // Convert the array of colors into a table for all the vertices.
-    let colors = faceColors.map((e, i) => [e, e, e, e]).flat(2);
-
-    // face indecies
-    let faceIndexSchema = [0, 1, 2, 1, 2, 3];
-    let faces = (new Array(6)).fill(0).map((e, i) => faceIndexSchema.map(j => j+i*4)).flat();
 
 //-- Progs and Shaders ---------------------
     let loadShader = (gl, type, src) => {
         let shader = gl.createShader(type);
         gl.shaderSource(shader, src);
         gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+        if (!(gl.getShaderParameter(shader, gl.COMPILE_STATUS) || gl.getShaderInfoLog(shader))){
             console.log(`An error occurred compiling the shaders: ${gl.getShaderInfoLog(shader)}`);
             gl.deleteShader(shader);
             return;
@@ -236,14 +180,14 @@ loadData();
             program: shaderProg,
             attribLocations: {
                 vertexPosition   : gl.getAttribLocation(shaderProg, "aVertexPosition"),
-                vertexNormal     : gl.getAttribLocation(shaderProg, "aVertexNormal"),
+                // vertexNormal     : gl.getAttribLocation(shaderProg, "aVertexNormal"),
                 vertexColor      : gl.getAttribLocation(shaderProg, "aVertexColor"),
             },
             uniformLocations: {
                 projectionMatrix : gl.getUniformLocation(shaderProg, "uProjectionMatrix"),
                 modelViewMatrix  : gl.getUniformLocation(shaderProg, "uModelViewMatrix"),
-                normalMatrix     : gl.getUniformLocation(shaderProg, "uNormalMatrix"),
-                uSampler         : gl.getUniformLocation(shaderProg, "uSampler"),
+                // normalMatrix     : gl.getUniformLocation(shaderProg, "uNormalMatrix"),
+                // uSampler         : gl.getUniformLocation(shaderProg, "uSampler"),
             },
         };
     }
@@ -256,23 +200,22 @@ loadData();
         return buffer;
     }
 
-    let createBuffers = (gl) => {
-        const positionBuffer     = createDataBuffer(gl, cubeVerts, gl.ARRAY_BUFFER        , Float32Array);
-        const colorBuffer        = createDataBuffer(gl, colors   , gl.ARRAY_BUFFER        , Float32Array);
-        const indexBuffer        = createDataBuffer(gl, faces    , gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
-        const normalBuffer       = createDataBuffer(gl, normals  , gl.ARRAY_BUFFER        , Float32Array);
+    let createBuffers = (gl, verts, faces, normals, colors) => {
+        const positionBuffer     = createDataBuffer(gl, verts  , gl.ARRAY_BUFFER        , Float32Array);
+        const indexBuffer        = createDataBuffer(gl, faces  , gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
+        const normalBuffer       = createDataBuffer(gl, normals, gl.ARRAY_BUFFER        , Float32Array);
+        const colorBuffer        = createDataBuffer(gl, colors , gl.ARRAY_BUFFER        , Float32Array);
 
         return {
             position     : positionBuffer,
-            color        : colorBuffer,
             indices      : indexBuffer,
             normal       : normalBuffer,
+            color        : colorBuffer,
         };
     }
 
 //-- Initialization ------------------------
     let initGLContext = () => {
-
         // get gl context
         let canvas = document.createElement("canvas");
         let gl = canvas.getContext("webgl2");
@@ -320,7 +263,7 @@ loadData();
     }
 
 //-- Drawing -------------------------------
-    let drawScene = (gl, programInfo, buffers, shaderProg) => {
+    let drawScene = (gl, programInfo, buffers, numElements, shaderProg) => {
         gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
         gl.clearDepth(1.0); // Clear everything
         gl.enable(gl.DEPTH_TEST); // Enable depth testing
@@ -359,7 +302,7 @@ loadData();
 
         // set vertex attributes
         setVertexAttribute(gl, buffers.position    , programInfo.attribLocations.vertexPosition, 3);
-        setVertexAttribute(gl, buffers.normal      , programInfo.attribLocations.vertexNormal  , 3);
+        // setVertexAttribute(gl, buffers.normal      , programInfo.attribLocations.vertexNormal  , 3);
         setVertexAttribute(gl, buffers.color       , programInfo.attribLocations.vertexColor   , 4);
 
         // Tell WebGL which indices to use to index the vertices
@@ -371,18 +314,18 @@ loadData();
         // Set the shader uniforms
         gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
-        gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+        // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
         gl.uniform1f(gl.getUniformLocation(shaderProg, "time"), performance.now()/1000);
 
         {
-            const vertexCount = 36;
+            const vertexCount = numElements; //TODO refactor this so that gl calls and setup are part of a 'Mesh' class
             const type = gl.UNSIGNED_SHORT;
             const offset = 0;
             gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
         }
     }
 
-    let draw = (gl, shaderProg, programInfo, buffers) => {
+    let draw = (gl, shaderProg, programInfo, buffers, numElements) => {
         // Set clear color to black, fully opaque
         gl.clearColor(0.0, 1.0, 1.0, 1.0);
 
@@ -390,7 +333,7 @@ loadData();
         gl.clear(gl.COLOR_BUFFER_BIT);
 
 
-        drawScene(gl, programInfo, buffers, shaderProg);
+        drawScene(gl, programInfo, buffers, numElements, shaderProg);
     }
 
 //-- Window Load ---------------------------
@@ -407,12 +350,21 @@ loadData();
 
         let shaderProg  = createShaderProgram(gl, vert, frag);
         let programInfo = createProg(gl, shaderProg);
-        let buffers     = createBuffers(gl);
+
+        //retreive gltf information
+        let verts   = gltfMeshes.map(e => e.positions).flat();
+        let normals = gltfMeshes.map(e => e.normals).flat();
+        let faces   = gltfMeshes.map(e => e.faces.map(f => f + e.offset)).flat();
+        let colors  = gltfMeshes.map(e => (new Array(e.positions.length/3)).fill(0).map(p => [...e.color, 1])).flat().flat();
+
+        console.log(verts, normals, faces, colors);
+
+        let buffers     = createBuffers(gl, verts, faces, normals, colors);
 
         // Flip image pixels into the bottom-to-top order that WebGL expects.
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-        autoLoop(draw, gl, shaderProg, programInfo, buffers);
+        autoLoop(draw, gl, shaderProg, programInfo, buffers, faces.length);
     }
 
 //-- Input Events ----------------------------
