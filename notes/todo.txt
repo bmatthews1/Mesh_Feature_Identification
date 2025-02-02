@@ -3,14 +3,30 @@ Create Standalone Node.js Web App:
     [ ] App boilerplate
         [*] Add server.js
         [*] Import Three.js GLTFLoader
-        [ ] Add WebGL boilerplate
+        [*] Add WebGL boilerplate
         [*] load and glb fil with GLTFLoader
         [ ] display model with vertex coloring
         [*] load JSON files
         [ ] load and parse .cs file
+
+    [ ] UI and Controls:
+        [ ] Camera
+            [*] Orbit
+            [*] Zoom
+            [ ] Pan
+        [ ] Menu and Interface
+            [ ] Dropdown displaying Groups along with element information
+            [ ] Click to select group on canvas
+            [ ] Click to select group in dropdown
 
     [ ] Main functionality
         [ ] GLTFLoader: Map faces -> Entity Id's -> Model Index 
         [ ] Add algorithm to raycast through triangles
             [ ] Flag each face as part of a pocket or not
             [ ] Use loaded adjacency information to create pocket groups
+
+    [ ] Refactor:
+        [ ] Move webgl boilerplate code into its own js file
+
+    [ ] Issues:
+        [ ] Lighting calculations are currently incorrect (needs updating)
