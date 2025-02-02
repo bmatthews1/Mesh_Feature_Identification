@@ -272,7 +272,7 @@ loadData();
 
 //-- Draw Setup ----------------------------
     let setVertexAttribute = (gl, attribute, location, numComponents, type=gl.FLOAT, normalize=false, stride=0, offset=0) => {
-        if (location == -1) return;
+        // if (location == -1) return; //TODO add error handling here
         gl.bindBuffer(gl.ARRAY_BUFFER, attribute);
         gl.vertexAttribPointer(location, numComponents, type, normalize, stride, offset);
         gl.enableVertexAttribArray(location);
