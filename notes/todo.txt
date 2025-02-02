@@ -18,6 +18,7 @@ Create Standalone Node.js Web App:
         [ ] Menu and Interface
             [ ] Dropdown displaying Groups along with element information
             [ ] Click to select group on canvas
+                [ ] ID based buffer render and click indexing
             [ ] Click to select group in dropdown
 
     [ ] Main functionality
@@ -27,7 +28,7 @@ Create Standalone Node.js Web App:
             [ ] Use loaded adjacency information to create pocket groups
 
     [ ] Refactor:
-        [ ] Move webgl boilerplate code into its own js file
+        [*] Move webgl boilerplate code into its own js file
         [ ] Add a "Mesh" class that can render individual meshes
         [ ] Pull Camera "lookAt" code out into its own function
 
@@ -35,5 +36,5 @@ Create Standalone Node.js Web App:
         [ ] Lighting calculations are currently incorrect (needs updating)
         [ ] Lighting has been disabled temporarily (due to vertexAttribIndex collisions from shader optimizations)
             [ ] Need to re-enable lighting and vertex normals
-            [ ] Meed to rework the lighting calculations
+            [ ] Need to rework the lighting calculations
         [*] Camera Lookat math is incorrect (has weird z offset)
