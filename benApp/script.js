@@ -17,6 +17,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 //-- Utils ------------------------------------------------
     let emptyFn = () => {};
+    let clamp   = (v, mn, mx) => Math.min(Math.max(v, mn), mx);
 
 //-- Data Loader Helper Functions -------------------------
     let modelLoaded = false;
@@ -37,6 +38,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
             });
             console.log(gltfMeshes);
             modelLoaded = true;
+            checkGLReadyState();
         });
     }
 
@@ -53,16 +55,26 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
             loadJSON(`${dataFolder}/${file}.json`, data => {
                 jsonData[file] = data;
                 filesLoaded++;
+                checkGLReadyState();
             });
         }
     }
 
-    let areFilesLoaded = () => {
+    let allFilesAreLoaded = () => {
+        console.log(modelLoaded, filesLoaded);
         return modelLoaded && filesLoaded == 4;
+    }
+
+    let checkGLReadyState = () => {
+        if (allFilesAreLoaded()){
+            console.log("all files loaded");
+            startGL();
+        }
     }
 
 loadData();
 
+//See https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
 //-- Shader Code ---------------------------
     // TODO - create automated attribute binding
     // TODO - create automated uniform definitions
@@ -294,13 +306,14 @@ loadData();
     let dRotY = 0;
     let aspect = 1.0;
     let zoom   = 1.0;
-    const fov   = Math.PI*.25;
+    const fov  = Math.PI*.25;
     const near = 0.1;
     const far  = 100.0;
 
     let updateCamera = (gl) => {
         rotX += dRotX;
         rotY += dRotY;
+        rotX = clamp(rotX, -Math.PI/2, Math.PI/2);
         dRotX *= .95;
         dRotY *= .95;
         aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
@@ -389,7 +402,7 @@ loadData();
         requestAnimationFrame(temp);
     }
 
-    window.onload = () => {
+    let startGL = () => {
         let gl = initGLContext();
 
         let shaderProg  = createShaderProgram(gl, vert, frag);
