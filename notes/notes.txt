@@ -31,6 +31,24 @@ Proposed Algorithm for Feature Detection:
         ----------------------
         A large problem that I can see happening in this case is a situation where two seperate pockets get marked as the same pocket by virtue of sharing a shallow bevel or depression. In fact, any amound of shared edges between two pockets would be enough to allow this algorithm to mistake two pockets as one. One way to get around this issue might be to add some sort of threshholding that limits face adjacency based on the dot product between the normals of the faces (although this also seems prone to error)
 
+Problems with the chosen algorithm:
+-----------------------------------
+    This algorithm makes several large assumptions about the data.
+        - It assumes a single "milling axis"
+        - It assumes the model is oriented orthoganal to the milling axis
+        - It assumes that the mesh will not be malformed or distorted in unexpected ways
+    
+    The primary edge case is one where the model data is oriented at a diagonal relative to the milling direction. In this case, it is possible to have a "false positive" by ray-casting through a protusion on the model
+    which will look like a pocket to the algorithm e.g.:
+
+        /\        /\
+       /  \      /  \
+    --*----X----*----X----->
+     /      \  /      \
+    /        \/        \ 
+
+    In these cases, the protrusion and overhang face will get falsely identified as a pocket even if it is more of a saddle shape.
+
 
 Visualization:
 --------------

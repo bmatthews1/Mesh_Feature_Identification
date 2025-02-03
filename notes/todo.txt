@@ -24,13 +24,18 @@ Create Standalone Node.js Web App:
     [ ] Main functionality
         [ ] GLTFLoader: Map faces -> Entity Id's -> Model Index 
         [ ] Add algorithm to raycast through triangles
-            [ ] Flag each face as part of a pocket or not
+            [*] Add ray-triangle intersect function
+            [*] Flag each face as part of a pocket or not
             [ ] Use loaded adjacency information to create pocket groups
 
     [ ] Refactor:
         [*] Move webgl boilerplate code into its own js file
         [ ] Add a "Mesh" class that can render individual meshes
         [ ] Pull Camera "lookAt" code out into its own function
+        [ ] Move ray tracing functions into their own file
+        [ ] Add "utils.js" file for file loading and helper functions
+        [ ] Add "DataTypes.js" file for class structures like Mesh
+        [ ] Rework ray triangle intersection to use native javascript arrays
 
     [ ] Issues:
         [ ] Lighting calculations are currently incorrect (needs updating)
