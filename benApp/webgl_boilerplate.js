@@ -48,7 +48,7 @@ import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
         // varying vec3 vLighting;
     `;
 
-    const vert= `${shaderHeader}
+    const vert = `${shaderHeader}
         in vec4 aVertexPosition;
         in vec4 aVertexColor;
         // in vec3 aVertexNormal;
@@ -92,7 +92,7 @@ import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
 
             // fragColor = vec4(color.rgb*vLighting, 1.0);
             fragColor = vec4(color.rgb, 1.0);
-            // fragColor = vec4(1);
+            // fragColor = vec4(1, 1, 1, .1);
         }
     `
 
@@ -254,6 +254,10 @@ import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
         gl.clearDepth(1.0); // Clear everything
         gl.enable(gl.DEPTH_TEST); // Enable depth testing
         gl.depthFunc(gl.LEQUAL); // Near things obscure far things
+
+        // XXX
+        // gl.enable(gl.BLEND)
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         // Clear the canvas before we start drawing on it.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
