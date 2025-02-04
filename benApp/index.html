@@ -8,12 +8,16 @@
         * { margin:0; padding:0; } 
         html, body { width:100%; height:100%; overflow: hidden; background:black;} 
         canvas { display:block; position: absolute; top:0; left:0 }
-        #controls {color:white; position: relative; z-index: 2; margin:10px;}
+        #infobox {color:white; position: absolute; top:0; left:0; z-index: 2; margin:10px;}
+        #controls {color:white; position: absolute; top:0; right:0; z-index: 2; margin:10px; text-align: right;}
     </style>
 </head>
 <body>
+    <div id="infobox">
+        <h2>Indentified Pockets:</h2>
+    </div>
     <div id="controls">
-        <h1>Hadrian Feature Detection</h1>
+        <!-- content filled by webgl_boilerplate.js -->
     </div>
     <script type="importmap">
         {

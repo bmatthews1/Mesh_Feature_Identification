@@ -124,6 +124,7 @@ const DEBUG = false;
 
             if (DEBUG) console.log(gltfMeshes);
             
+            WGLB.populateControls();
             WGLB.startGL(gltfMeshes);
             WGLB.setModelInfo(modelRadius, modelCenter);
         }
@@ -297,10 +298,6 @@ const DEBUG = false;
             //if they are, mark this group as a pocket as well
             if (allAdjacentArePockets) mesh.isPocket = true;
         }
-
-        //color pockets blue
-        for (let mesh of gltfMeshes.filter(mesh => mesh.isPocket)) mesh.color = [0, 0, 1];
-        
     }
 
 //-- Building Group Information ---------------------------

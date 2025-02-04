@@ -20,10 +20,13 @@ Create Standalone Node.js Web App:
             [ ] Click to select group on canvas
                 [ ] ID based buffer render and click indexing
             [ ] Click to select group in dropdown
+            [ ] Add controls for coloring toggles
+                [ ] shaded, render-ids, showPockets
 
     [*] Main functionality
         [*] GLTFLoader: Map faces -> Entity Id's -> Model Index
             - already taken care of by gltf meta-data
+        [ ] Add Pocket information to attribute buffer
         [*] Add algorithm to raycast through triangles
             [*] Add ray-triangle intersect function
             [*] Flag each face as part of a pocket or not

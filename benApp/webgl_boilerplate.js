@@ -3,6 +3,40 @@ const DEBUG = false;
 
 //See https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
 
+//-- Controls ------------------------------
+    let controlsParams = {
+        showLighting : true,
+        showIndexColors : false,
+        highlightPockets : true,
+    }
+
+    //this code populates the controls div in the index.html file
+    //it is done this way to provide easier visibility for the code in this file
+    let populateControls = () => {
+        let controls = document.getElementById("controls");
+
+        //helper function
+        let addCheckBox = (name) => {
+            let div = document.createElement("div");
+            let label = document.createElement("label");
+            label.innerHTML = name + ": ";
+            let checkBox = document.createElement("input");
+            checkBox.setAttribute("type", "checkbox");
+            checkBox.onclick = evt => {
+                controlsParams[name] = checkBox.checked;
+            }
+            div.appendChild(label);
+            div.appendChild(checkBox);
+            controls.appendChild(div);
+            checkBox.checked = controlsParams[name];
+        }
+
+        //add controls
+        addCheckBox("showLighting");
+        addCheckBox("showIndexColors");
+        addCheckBox("highlightPockets");
+    };
+
 //-- Globals -------------------------------
     //TODO strip all of this info out  and put is into the Mesh class
     let modelInfo = {
@@ -47,13 +81,14 @@ const DEBUG = false;
     let varying = `
         varying vec4 color;
         varying vec3 normal;
-        // varying vec3 vLighting;
+        varying float pocket;
     `;
 
     const vert = `${shaderHeader}
         in vec4 aVertexPosition;
         in vec4 aVertexColor;
         in vec3 aVertexNormal;
+        in float aVertexPocket;
 
         uniform mat4 uModelViewMatrix;
         uniform mat4 uProjectionMatrix;
@@ -71,6 +106,9 @@ const DEBUG = false;
 
             // normals
             normal = (uNormalMatrix * vec4(aVertexNormal, 1.0)).xyz;
+
+            //pocketInfo
+            pocket = aVertexPocket;
         }
     `;
 
@@ -78,22 +116,27 @@ const DEBUG = false;
         ${varying.replaceAll("varying", "in")}
 
         uniform float showIndexColors;
+        uniform float showLighting;
+        uniform float highlightPockets;
         uniform float time;
         uniform vec2  resolution;
 
         out vec4 fragColor;
 
         void main() {
-
             highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
             highp vec3 directionalLightColor = vec3(1, 1, 1);
             highp vec3 directionalVector = normalize(vec3(0.0, 0.0, 0.5));
 
             float dirAmt = clamp(dot(normal, directionalVector), 0.0, 1.0);
-            float lightAmt = ambientLight.x + pow(dirAmt, 1.2);
+            float lightAmt = ambientLight.x + pow(dirAmt, 1.2)*(1.0-ambientLight.x);
 
-            fragColor = vec4(vec3(lightAmt*0.5), 1.0);
-            if (showIndexColors != 0.0) fragColor = vec4(color.rgb*lightAmt, 1.0);
+            vec3 col = vec3(0.6);
+            if (showIndexColors != 0.0) col = color.rgb;
+            if (highlightPockets != 0.0 && pocket != 0.0) col = mix(col, vec3(1, 1, 0), 0.7);
+            if (showLighting != 0.0) col *= lightAmt;
+
+            fragColor = vec4(col, 1.0);
         }
     `
 
@@ -154,17 +197,19 @@ const DEBUG = false;
         return buffer;
     }
 
-    let createBuffers = (gl, verts, faces, normals, colors) => {
+    let createBuffers = (gl, verts, faces, normals, colors, pockets) => {
         const positionBuffer     = createDataBuffer(gl, verts  , gl.ARRAY_BUFFER        , Float32Array);
         const indexBuffer        = createDataBuffer(gl, faces  , gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
         const normalBuffer       = createDataBuffer(gl, normals, gl.ARRAY_BUFFER        , Float32Array);
         const colorBuffer        = createDataBuffer(gl, colors , gl.ARRAY_BUFFER        , Float32Array);
+        const pocketBuffer       = createDataBuffer(gl, pockets, gl.ARRAY_BUFFER        , Float32Array);
 
         return {
             position     : positionBuffer,
             indices      : indexBuffer,
             normal       : normalBuffer,
             color        : colorBuffer,
+            pocket       : pocketBuffer,
         };
     }
 
@@ -277,6 +322,7 @@ const DEBUG = false;
         setVertexAttribute(gl, buffers.position    , programInfo.attribLocations.vertexPosition, 3);
         setVertexAttribute(gl, buffers.normal      , programInfo.attribLocations.vertexNormal  , 3);
         setVertexAttribute(gl, buffers.color       , programInfo.attribLocations.vertexColor   , 4);
+        setVertexAttribute(gl, buffers.pocket      , gl.getAttribLocation(shaderProg, "aVertexPocket"), 1);
 
         // Tell WebGL which indices to use to index the vertices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
@@ -288,7 +334,9 @@ const DEBUG = false;
         gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
-        gl.uniform1f(gl.getUniformLocation(shaderProg, "showIndexColors"), 0.0);
+        gl.uniform1f(gl.getUniformLocation(shaderProg, "showIndexColors" ), controlsParams.showIndexColors  ? 1 : 0);
+        gl.uniform1f(gl.getUniformLocation(shaderProg, "showLighting"    ), controlsParams.showLighting     ? 1 : 0);
+        gl.uniform1f(gl.getUniformLocation(shaderProg, "highlightPockets"), controlsParams.highlightPockets ? 1 : 0);
         gl.uniform1f(gl.getUniformLocation(shaderProg, "time"), performance.now()/1000);
         gl.uniform2f(gl.getUniformLocation(shaderProg, "resolution"), gl.canvas.width, gl.canvas.height);
 
@@ -329,10 +377,11 @@ const DEBUG = false;
         let normals = gltfMeshes.map(e => e.normals).flat();
         let faces   = gltfMeshes.map(e => e.faces.map(f => f + e.offset)).flat();
         let colors  = gltfMeshes.map(e => (new Array(e.positions.length/3)).fill(0).map(p => [...e.color, 1])).flat().flat();
+        let pockets = gltfMeshes.map(e => (new Array(e.positions.length/3).fill(0).map(p => e.isPocket ? 1 : 0))).flat();
 
-        if (DEBUG) console.log(verts, normals, faces, colors);
+        if (DEBUG) console.log(verts, normals, faces, colors, pockets);
 
-        let buffers = createBuffers(gl, verts, faces, normals, colors);
+        let buffers = createBuffers(gl, verts, faces, normals, colors, pockets);
 
         // Flip image pixels into the bottom-to-top order that WebGL expects.
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -370,6 +419,7 @@ const DEBUG = false;
 //-- Export Functionality ---------------------------
     let WGLB = {
         startGL,
-        setModelInfo
+        setModelInfo,
+        populateControls,
     }
     export {WGLB}
