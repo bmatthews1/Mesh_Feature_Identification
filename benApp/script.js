@@ -120,13 +120,62 @@ const DEBUG = false;
             assignMeshGroupAdjacency(gltfMeshes);
             findPockets(gltfMeshes);
 
-            getPocketMetaData(gltfMeshes);
+            let pockets = getPocketMetaData(gltfMeshes);
+            populatePocketInfo(pockets);
 
             if (DEBUG) console.log(gltfMeshes);
             
             WGLB.populateControls();
             WGLB.startGL(gltfMeshes);
             WGLB.setModelInfo(modelRadius, modelCenter);
+        }
+    }
+
+//-- Display Pocket Information ---------------------------
+    let populatePocketInfo = (pockets) => {
+        console.log(pockets);
+        let infoBox = document.getElementById("infobox");
+
+        //stop mouse wheel event propogation
+        infoBox.addEventListener("wheel", evt => {evt.stopPropagation();})
+        infoBox.addEventListener("pointermove", evt => {evt.stopPropagation();});
+
+        let addBr = (elem) => {
+            let br = document.createElement("br");
+            elem.appendChild(br);
+        }
+
+        for (let pocket of pockets){
+            let subLabels = [];
+            let label = document.createElement("label");
+            label.innerHTML = pocket.name + " ▶";
+            label.style.paddingLeft = "1em";
+            pocket.expanded = false;
+
+            let div = document.createElement("div");
+            div.style.display = "none";
+
+            label.onclick = evt => {
+                pocket.expanded = !pocket.expanded;
+                label.innerHTML = pocket.name + (pocket.expanded ? " ▼" : " ▶");
+                div.style.display = pocket.expanded ? "block" : "none";
+            }
+
+            infoBox.appendChild(label);
+            addBr(infoBox);
+
+            for (let mesh of pocket.meshes){
+                let label2 = document.createElement("label");
+                label2.innerHTML = mesh.name;
+                label2.style.paddingLeft = "2em";
+                subLabels.push(label2);
+
+                div.appendChild(label2);
+                addBr(div);
+            }
+            infoBox.appendChild(div);
+            addBr(div);
+
         }
     }
 
@@ -188,7 +237,7 @@ const DEBUG = false;
     let normalize = (v) => smult(v, 1/Math.hypot(...v));
     
     let isPointInsideTriangle = (p, a, b, c) => {
-        const epsilon = 0.005;
+        const epsilon = 0.005; //TODO make this value a something that can be user specified
         const v0 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
         const v1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
         const v2 = [p[0] - a[0], p[1] - a[1], p[2] - a[2]];
@@ -342,4 +391,7 @@ const DEBUG = false;
         return pockets
     }
 
-loadData();
+//-- Main ------------------------------------------
+    window.onload = () => {
+        loadData();
+    }

@@ -16,12 +16,12 @@ Create Standalone Node.js Web App:
             [ ] Pan
             [*] Camera automatically zooms to fit object in viewport (use gltf bounding regions)
         [ ] Menu and Interface
-            [ ] Dropdown displaying Groups along with element information
+            [*] Dropdown displaying Groups along with element information
             [ ] Click to select group on canvas
                 [ ] ID based buffer render and click indexing
             [ ] Click to select group in dropdown
-            [ ] Add controls for coloring toggles
-                [ ] shaded, render-ids, showPockets
+            [*] Add controls for coloring toggles
+                [*] shaded, render-ids, showPockets
 
     [*] Main functionality
         [*] GLTFLoader: Map faces -> Entity Id's -> Model Index
