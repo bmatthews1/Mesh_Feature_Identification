@@ -30,7 +30,7 @@ Things I've tried:
         - Did not work, the previous version also suffered from the same issues
 
     [*] Removing intersection points that are not "strictly" within a triangle
-        - This did actually end up working, but requires a very precise precision threshhold (which is hacky)
+        - This did actually end up working, but requires a very precise threshhold value (which is hacky)
 
 Solution:
     This ended up being a problem with rays brushing up against the edge or face of a coplanar triangle. The triangle-ray hit detection should have had checks to prevent this, but they either did not work as expected or did not cover the (literal) edge case of a ray brushing the edge of a non-coplanar triangle.

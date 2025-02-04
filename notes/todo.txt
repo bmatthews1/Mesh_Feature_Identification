@@ -43,8 +43,8 @@ Create Standalone Node.js Web App:
     [ ] Issues:
         [*] There is a large issue with the new face-ray sampling system flagging the incorrect faces
             [*] Figure out why false flags are happening 
-        [ ] Lighting calculations are currently incorrect (needs updating)
-        [ ] Lighting has been disabled temporarily (due to vertexAttribIndex collisions from shader optimizations)
-            [ ] Need to re-enable lighting and vertex normals
-            [ ] Need to rework the lighting calculations
+        [*] Lighting calculations are currently incorrect (needs updating)
+        [*] Lighting has been disabled temporarily (due to vertexAttribIndex collisions from shader optimizations)
+            [*] Need to re-enable lighting and vertex normals
+            [*] Need to rework the lighting calculations
         [*] Camera Lookat math is incorrect (has weird z offset)

@@ -26,6 +26,7 @@ const DEBUG = false;
     
     //-- Data Accessors:
         const xyzSwizzle = ['x', 'y', 'z'];
+        const rgbSwizzle = ['r', 'g', 'b'];
 
 //-- Utils ------------------------------------------------
     let emptyFn = () => {};
@@ -48,12 +49,12 @@ const DEBUG = false;
 
                 // retrieve geometry, id, and color information from gltf data
                 let meshProxy = {
-                    id : child.id,
+                    id : child.id, //gltf group id (currently unused)
                     normals : [...attributes.normal.array],
                     positions : [...attributes.position.array],
                     faces : [...geom.index.array],
-                    color : ["r", "g", "b"].map(e => child.material.color[e]),
-                    idx : idx,
+                    color : rgbSwizzle.map(e => child.material.color[e]),
+                    idx : idx, //the index that will correspond to the adjacency information
                     bounds : [
                         ...xyzSwizzle.map(e => geom.boundingBox.min[e]),
                         ...xyzSwizzle.map(e => geom.boundingBox.max[e]),

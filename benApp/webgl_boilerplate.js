@@ -46,54 +46,54 @@ const DEBUG = false;
 
     let varying = `
         varying vec4 color;
+        varying vec3 normal;
         // varying vec3 vLighting;
     `;
 
     const vert = `${shaderHeader}
         in vec4 aVertexPosition;
         in vec4 aVertexColor;
-        // in vec3 aVertexNormal;
+        in vec3 aVertexNormal;
 
-        uniform   mat4 uModelViewMatrix;
-        uniform   mat4 uProjectionMatrix;
-        // uniform   mat4 uNormalMatrix;
-
-        uniform float time;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+        uniform mat4 uNormalMatrix;
 
         ${varying.replaceAll("varying", "out")}
 
         void main() {
             // position
             vec4 pos = aVertexPosition;
-
             gl_Position = uProjectionMatrix * uModelViewMatrix * pos;
 
             // colors
-            color         = aVertexColor;
-            
-            // lighting
-            // highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
-            // highp vec3 directionalLightColor = vec3(1, 1, 1);
-            // highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
+            color = aVertexColor;
 
-            // highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
-
-            // highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-            // vLighting = ambientLight + (directionalLightColor * directional);
+            // normals
+            normal = (uNormalMatrix * vec4(aVertexNormal, 1.0)).xyz;
         }
     `;
 
     const frag = `${shaderHeader}
         ${varying.replaceAll("varying", "in")}
 
+        uniform float showIndexColors;
+        uniform float time;
+        uniform vec2  resolution;
+
         out vec4 fragColor;
 
         void main() {
-            //gl_FragColor = color;
 
-            // fragColor = vec4(color.rgb*vLighting, 1.0);
-            fragColor = vec4(color.rgb, 1.0);
-            // fragColor = vec4(1, 1, 1, .1);
+            highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+            highp vec3 directionalLightColor = vec3(1, 1, 1);
+            highp vec3 directionalVector = normalize(vec3(0.0, 0.0, 0.5));
+
+            float dirAmt = clamp(dot(normal, directionalVector), 0.0, 1.0);
+            float lightAmt = ambientLight.x + pow(dirAmt, 1.2);
+
+            fragColor = vec4(vec3(lightAmt*0.5), 1.0);
+            if (showIndexColors != 0.0) fragColor = vec4(color.rgb*lightAmt, 1.0);
         }
     `
 
@@ -133,13 +133,14 @@ const DEBUG = false;
             program: shaderProg,
             attribLocations: {
                 vertexPosition   : gl.getAttribLocation(shaderProg, "aVertexPosition"),
-                // vertexNormal     : gl.getAttribLocation(shaderProg, "aVertexNormal"),
+                vertexNormal     : gl.getAttribLocation(shaderProg, "aVertexNormal"),
                 vertexColor      : gl.getAttribLocation(shaderProg, "aVertexColor"),
             },
             uniformLocations: {
                 projectionMatrix : gl.getUniformLocation(shaderProg, "uProjectionMatrix"),
                 modelViewMatrix  : gl.getUniformLocation(shaderProg, "uModelViewMatrix"),
-                // normalMatrix     : gl.getUniformLocation(shaderProg, "uNormalMatrix"),
+                normalMatrix     : gl.getUniformLocation(shaderProg, "uNormalMatrix"),
+                showIndexColors  : gl.getUniformLocation(shaderProg, "showIndexColors"),
                 // uSampler         : gl.getUniformLocation(shaderProg, "uSampler"),
             },
         };
@@ -243,8 +244,11 @@ const DEBUG = false;
 
         //create a normals matrix
         const normalMatrix = mat4.create();
-        mat4.invert(normalMatrix, modelViewMatrix);
-        mat4.transpose(normalMatrix, normalMatrix);
+
+        rotate(normalMatrix, rotX, [1, 0, 0]);
+        rotate(normalMatrix, rotY, [0, 1, 0]);
+        // mat4.invert(normalMatrix, modelViewMatrix);
+        // mat4.transpose(normalMatrix, normalMatrix);
 
         return {projectionMatrix, modelViewMatrix, normalMatrix};
     }
@@ -271,7 +275,7 @@ const DEBUG = false;
 
         // set vertex attributes
         setVertexAttribute(gl, buffers.position    , programInfo.attribLocations.vertexPosition, 3);
-        // setVertexAttribute(gl, buffers.normal      , programInfo.attribLocations.vertexNormal  , 3);
+        setVertexAttribute(gl, buffers.normal      , programInfo.attribLocations.vertexNormal  , 3);
         setVertexAttribute(gl, buffers.color       , programInfo.attribLocations.vertexColor   , 4);
 
         // Tell WebGL which indices to use to index the vertices
@@ -283,8 +287,10 @@ const DEBUG = false;
         // Set the shader uniforms
         gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
-        // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+        gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+        gl.uniform1f(gl.getUniformLocation(shaderProg, "showIndexColors"), 0.0);
         gl.uniform1f(gl.getUniformLocation(shaderProg, "time"), performance.now()/1000);
+        gl.uniform2f(gl.getUniformLocation(shaderProg, "resolution"), gl.canvas.width, gl.canvas.height);
 
         {
             const vertexCount = numElements; //TODO refactor this so that gl calls and setup are part of a 'Mesh' class
