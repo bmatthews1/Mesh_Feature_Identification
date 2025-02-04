@@ -1,9 +1,9 @@
 False Detection Problem:
 ------------------------
-There is an issue when sampling rays based on the center points of triangles where certain faces (particularly around the edges of external faces and faces along the protrusion) get falsly flagged as part of a pocket.
+There is an issue when sampling rays based on the center points of triangles where certain faces (particularly around the edges of external faces and faces along the protrusion) get falsely flagged as part of a pocket.
 
 What I know:
-    - Traingles on the protrusion are being marked as a pocket when they should not be, due to the ray only passing through 2 faces
+    - Triangles on the protrusion are being marked as a pocket when they should not be, due to the ray only passing through 2 faces
     - Triangles on the outside of the object are being marked as a pocket despite the first and last hit in the hit list being culled
     - This is happening on both the x and z axis
     - The last face is not being calculated improperly
@@ -33,6 +33,6 @@ Things I've tried:
         - This did actually end up working, but requires a very precise precision threshhold (which is hacky)
 
 Solution:
-    This ended up being a problem with rays brushing up against the edge or face of a coplaner triangle. The triangle-ray hit detection should have had checks to prevent this, but they either did not work as expected or did not cover the (literal) edge case of a ray brushing the edge of a non-coplaner triangle.
+    This ended up being a problem with rays brushing up against the edge or face of a coplanar triangle. The triangle-ray hit detection should have had checks to prevent this, but they either did not work as expected or did not cover the (literal) edge case of a ray brushing the edge of a non-coplanar triangle.
 
     In order to prevent these types of false detections, I added a isPointInTriangle method along with a epsilon value that detects when points are within a certain percentage of the edge of a triangle. If they are, then I toss those detection points. This ended up working, but the epsilon value is VERY sensitive and also model dependant. It also did not resolve the issue where the parity of the number of hit points could end up being ODD

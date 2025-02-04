@@ -14,7 +14,7 @@ Create Standalone Node.js Web App:
             [*] Orbit
             [*] Zoom
             [ ] Pan
-            [*] Camera automatically zooms to fit object in viewport (use gltf bouning regions)
+            [*] Camera automatically zooms to fit object in viewport (use gltf bounding regions)
         [ ] Menu and Interface
             [ ] Dropdown displaying Groups along with element information
             [ ] Click to select group on canvas

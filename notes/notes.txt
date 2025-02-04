@@ -8,7 +8,7 @@ Given the input glb file and a list of face adjacency information, identify "poc
 
 First Impressions:
 ------------------
-What immediatly stands out to me is what the definition of a "pocket" is. Topologically there is no objective difference between a pocket and a small divot or dip in the surface. In this sense I feel like there are a few immediate edge cases to look out for, such as *bevels*, *depressions*, and *saddles* in the shape.
+What immediately stands out to me is what the definition of a "pocket" is. Topologically there is no objective difference between a pocket and a small divot or dip in the surface. In this sense I feel like there are a few immediate edge cases to look out for, such as *bevels*, *depressions*, and *saddles* in the shape.
 
 I'm assuming that in the world of CNC machining, a "pocket" has a very precise definition. Based on a cursory google search, it seems a "pocket" is any cavity or depression in a shape that can be removed through milling (see cnc_pocket_reference.txt). Additionally, sources specify that these pockets generally (but not always) comprise a closed "boundary" on the sides - which would eliminate the need to check for saddles.
 
@@ -20,7 +20,7 @@ Proposed Algorithm for Feature Detection:
 
         Issues and Edge Cases:
         ----------------------
-        One problem with this approach is that it is resolution dependant. If the pocketsize is smaller than the largest gap between rays on our lattice, then the rays have a chance of missing the pocket entirely.
+        One problem with this approach is that it is resolution dependant. If the pocket size is smaller than the largest gap between rays on our lattice, then the rays have a chance of missing the pocket entirely.
 
     - Step 2.) Combine Pocket Faces
         Now that we have a list of faces that form pockets, we can use the face adjacency information provided to "stitch" adjacent faces into closed boundaries. If no adjacency information is provided then there will need to be an additional step to generate that information. 
@@ -29,16 +29,16 @@ Proposed Algorithm for Feature Detection:
         
         Issues and Edge Cases:
         ----------------------
-        A large problem that I can see happening in this case is a situation where two seperate pockets get marked as the same pocket by virtue of sharing a shallow bevel or depression. In fact, any amound of shared edges between two pockets would be enough to allow this algorithm to mistake two pockets as one. One way to get around this issue might be to add some sort of threshholding that limits face adjacency based on the dot product between the normals of the faces (although this also seems prone to error)
+        A large problem that I can see happening in this case is a situation where two separate pockets get marked as the same pocket by virtue of sharing a shallow bevel or depression. In fact, any amount of shared edges between two pockets would be enough to allow this algorithm to mistake two pockets as one. One way to get around this issue might be to add some sort of threshholding that limits face adjacency based on the dot product between the normals of the faces (although this also seems prone to error)
 
 Problems with the chosen algorithm:
 -----------------------------------
     This algorithm makes several large assumptions about the data.
         - It assumes a single "milling axis"
-        - It assumes the model is oriented orthoganal to the milling axis
+        - It assumes the model is oriented orthogonal to the milling axis
         - It assumes that the mesh will not be malformed or distorted in unexpected ways
     
-    The primary edge case is one where the model data is oriented at a diagonal relative to the milling direction. In this case, it is possible to have a "false positive" by ray-casting through a protusion on the model
+    The primary edge case is one where the model data is oriented at a diagonal relative to the milling direction. In this case, it is possible to have a "false positive" by ray-casting through a protrusion on the model
     which will look like a pocket to the algorithm e.g.:
 
         /\        /\
@@ -49,7 +49,7 @@ Problems with the chosen algorithm:
 
     In these cases, the protrusion and overhang face will get falsely identified as a pocket even if it is more of a saddle shape.
 
-    There is another issue (detailed more in false_detection_problem.txt) where there are false positives that occur due to rays brushing up against the side of non-coplaner faces. This causes triangles to be incorrectly marked as hits in the intersection stack which causes them to be marked as pockets
+    There is another issue (detailed more in false_detection_problem.txt) where there are false positives that occur due to rays brushing up against the side of non-coplanar faces. This causes triangles to be incorrectly marked as hits in the intersection stack which causes them to be marked as pockets
 
 
 Visualization:
@@ -60,11 +60,11 @@ A stretch goal would be to have the visualization to have some basic bells and w
 
 Ideally I would prefer to do this visualization in native Javascript/webgl, but if that becomes a time constraint, I will default back to the provided react/THREE.js app
 
-Ideally it would be nice to provide controls and visualization for the latice spacing and bevel threashholding as well.
+Ideally it would be nice to provide controls and visualization for the lattice spacing and bevel threashholding as well.
 
 UI:
 ---
-There will need to be some sort of UI to navigate through the identified pockets. The easiest would be a native html list of face groups along with their assosiated face Ids. If clicked, this list should focus the camera on that group (which could be accomplished with a "lookat" matrix).
+There will need to be some sort of UI to navigate through the identified pockets. The easiest would be a native html list of face groups along with their associated face Ids. If clicked, this list should focus the camera on that group (which could be accomplished with a "lookat" matrix).
 
 
 

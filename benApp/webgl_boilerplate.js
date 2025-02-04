@@ -1,4 +1,5 @@
 import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
+const DEBUG = false;
 
 //See https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
 
@@ -317,13 +318,13 @@ import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
         let programInfo = createProg(gl, shaderProg);
 
         //TODO move to "addModel" function
-        //retreive gltf information
+        //retrieve gltf information
         let verts   = gltfMeshes.map(e => e.positions).flat();
         let normals = gltfMeshes.map(e => e.normals).flat();
         let faces   = gltfMeshes.map(e => e.faces.map(f => f + e.offset)).flat();
         let colors  = gltfMeshes.map(e => (new Array(e.positions.length/3)).fill(0).map(p => [...e.color, 1])).flat().flat();
 
-        console.log(verts, normals, faces, colors);
+        if (DEBUG) console.log(verts, normals, faces, colors);
 
         let buffers = createBuffers(gl, verts, faces, normals, colors);
 

@@ -144,14 +144,14 @@ const DEBUG = false;
         let inv_det = 1.0 / det;
         let s = sub(rayOrigin, v0);
         let u = inv_det * dot(s, ray_cross_e2);
-        if (u <= 0.0 || u >= 1.0){
-            return null; // Triangle is behind the ray
+        if (u < 0.0 || u > 1.0){
+            return null; //Triangle is coplanar to ray
         }
 
         let s_cross_e1 = cross(s, edge1);
         let v = inv_det * dot(rayDirection, s_cross_e1);
-        if (v <= 0.0 || v >= 1.0){
-            return null; // Triangle is behind the ray
+        if (v < 0.0 || v > 1.0){
+            return null; //Triangle is coplanar to ray
         } 
     
         // Calculate the intersection point
@@ -196,7 +196,7 @@ const DEBUG = false;
         const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
         const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
       
-        // Check if point is stricly inside triangle
+        // Check if point is strictly inside triangle
         return (u > epsilon) && (v > epsilon) && (u + v < 1-epsilon*2);
     }
 
@@ -250,7 +250,7 @@ const DEBUG = false;
         let {xRays, zRays} = createRayOriginPoints(triangles); //TODO add these to the gl draw to visualize
         let [xDir, zDir] = [[1, 0, 0], [0, 0, 1]];
 
-        //perfrom the raycasting
+        //perform the raycasting
         let castRays = (rays, dir) => {
             for (let ray of rays){
                 let hits = [];
