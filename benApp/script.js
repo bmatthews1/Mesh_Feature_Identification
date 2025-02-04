@@ -114,8 +114,15 @@ const DEBUG = false;
     let checkGLReadyState = () => {
         if (allFilesAreLoaded()){
             console.log("all files loaded");
+            
+            //gather meta-data about the meshes
+            assignMeshGroupAdjacency(gltfMeshes);
             findPockets(gltfMeshes);
+
+            getPocketMetaData(gltfMeshes);
+
             if (DEBUG) console.log(gltfMeshes);
+            
             WGLB.startGL(gltfMeshes);
             WGLB.setModelInfo(modelRadius, modelCenter);
         }
@@ -279,12 +286,9 @@ const DEBUG = false;
         for (let mesh of gltfMeshes){
             if (mesh.isPocket) continue;
 
-            //adjacency file reports index stating from 1, we use staring from 0
-            let adjacency = jsonData.adjacency_graph[mesh.idx+1].map(i => parseInt(i)-1);
-
             //check if all adjacent groups are pockets
             let allAdjacentArePockets = true;
-            for (let idx of adjacency){
+            for (let idx of mesh.adjacency){
                 allAdjacentArePockets &= gltfMeshes[idx].isPocket;
                 if (!allAdjacentArePockets) break;
             }
@@ -296,6 +300,48 @@ const DEBUG = false;
         //color pockets blue
         for (let mesh of gltfMeshes.filter(mesh => mesh.isPocket)) mesh.color = [0, 0, 1];
         
+    }
+
+//-- Building Group Information ---------------------------
+    let assignMeshGroupAdjacency = (gltfMeshes) => {
+        for (let mesh of gltfMeshes){
+            if (mesh.isPocket) continue;
+
+            //adjacency file reports index stating from 1, we use staring from 0
+            mesh.adjacency = jsonData.adjacency_graph[mesh.idx+1].map(i => parseInt(i)-1);
+        }
+    }
+
+    let getPocketMetaData = (gltfMeshes) => {
+        let pockets = [];
+        let makePocket = (name, meshes) => ({name, meshes});
+
+        //setup default mesh flag
+        for (let mesh of gltfMeshes) mesh.partOfGroup = false;
+
+        //recursive function to traverse through mesh adjacencies
+        let getAllConnectedMeshes = mesh => {
+            let connections = [];
+            for (let idx of mesh.adjacency){
+                let mesh2 = gltfMeshes[idx];
+                if (!mesh2.partOfGroup && mesh2.isPocket){
+                    mesh2.partOfGroup = true;
+                    connections.push(mesh2, ...getAllConnectedMeshes(mesh2));
+                }
+            }
+            return connections;
+        }
+
+        //gather connected meshes and store in pocket array
+        for (let mesh of gltfMeshes){
+            if (!mesh.partOfGroup && mesh.isPocket){
+                let meshes = [mesh, ...getAllConnectedMeshes(mesh)];
+                pockets.push(makePocket("Pocket_" + pockets.length, meshes));
+            }
+        }
+
+        if (DEBUG) console.log(pockets);
+        return pockets
     }
 
 loadData();

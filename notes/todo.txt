@@ -21,19 +21,21 @@ Create Standalone Node.js Web App:
                 [ ] ID based buffer render and click indexing
             [ ] Click to select group in dropdown
 
-    [ ] Main functionality
-        [ ] GLTFLoader: Map faces -> Entity Id's -> Model Index 
-        [ ] Add algorithm to raycast through triangles
+    [*] Main functionality
+        [*] GLTFLoader: Map faces -> Entity Id's -> Model Index
+            - already taken care of by gltf meta-data
+        [*] Add algorithm to raycast through triangles
             [*] Add ray-triangle intersect function
             [*] Flag each face as part of a pocket or not
             [*] Use adjacency to mark groups that are fully by other pocket groups as groups themselves
-            [ ] Use loaded adjacency information to create pocket groups
+            [*] Use loaded adjacency information to create pocket groups
 
     [ ] Refactor:
         [*] Move webgl boilerplate code into its own js file
         [ ] Add a "Mesh" class that can render individual meshes
         [ ] Pull Camera "lookAt" code out into its own function
-        [ ] Move ray tracing functions into their own file
+        [ ] Move ray tracing functions into their own file "gltfParser.js"
+            [ ] Encapsulte gltfMeshes and metadat into its own object
         [ ] Add "utils.js" file for file loading and helper functions
         [ ] Add "DataTypes.js" file for class structures like Mesh
         [*] Rework ray triangle intersection to use native javascript arrays for speed
