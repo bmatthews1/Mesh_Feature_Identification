@@ -26,6 +26,7 @@ Create Standalone Node.js Web App:
         [ ] Add algorithm to raycast through triangles
             [*] Add ray-triangle intersect function
             [*] Flag each face as part of a pocket or not
+            [*] Use adjacency to mark groups that are fully by other pocket groups as groups themselves
             [ ] Use loaded adjacency information to create pocket groups
 
     [ ] Refactor:
@@ -35,9 +36,11 @@ Create Standalone Node.js Web App:
         [ ] Move ray tracing functions into their own file
         [ ] Add "utils.js" file for file loading and helper functions
         [ ] Add "DataTypes.js" file for class structures like Mesh
-        [ ] Rework ray triangle intersection to use native javascript arrays
+        [*] Rework ray triangle intersection to use native javascript arrays for speed
 
     [ ] Issues:
+        [*] There is a large issue with the new face-ray sampling system flagging the incorrect faces
+            [*] Figure out why false flags are happening 
         [ ] Lighting calculations are currently incorrect (needs updating)
         [ ] Lighting has been disabled temporarily (due to vertexAttribIndex collisions from shader optimizations)
             [ ] Need to re-enable lighting and vertex normals

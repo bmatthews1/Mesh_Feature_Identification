@@ -257,7 +257,8 @@ import {mat4} from 'https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm'
 
         // XXX
         // gl.enable(gl.BLEND)
-        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        // gl.blendEquation(gl.FUNC_ADD);
 
         // Clear the canvas before we start drawing on it.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

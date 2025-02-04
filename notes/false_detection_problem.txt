@@ -1,0 +1,38 @@
+False Detection Problem:
+------------------------
+There is an issue when sampling rays based on the center points of triangles where certain faces (particularly around the edges of external faces and faces along the protrusion) get falsly flagged as part of a pocket.
+
+What I know:
+    - Traingles on the protrusion are being marked as a pocket when they should not be, due to the ray only passing through 2 faces
+    - Triangles on the outside of the object are being marked as a pocket despite the first and last hit in the hit list being culled
+    - This is happening on both the x and z axis
+    - The last face is not being calculated improperly
+    - There are hit stacks that contain an ODD number of hit points (should be impossible) ***
+
+Things I've tried:
+    [X] removing degenerate triangles
+        - there are indeed 12 degenerate triangles
+        - they do not appear to be affecting the ray tracing
+    
+    [X] removing duplicate/identical triangles
+        - there are no duplicate triangles on this model
+    
+    [X] removing overlapping triangles
+        - the triangle overlap algorithm is overly aggressive
+
+    [X] rendering the model with blend-ADD to visually check for overlapping triangles
+        - there do not appear to be any overdraws happening (no overlapping triangles)
+
+    [X] Searching for off-model triangles or triangles that are at infinity
+        - There are no triangles that are beyond the model bounding info reported in the gltf file
+
+    [X] Reverting to previous version and running detection with the glMatrix.vec3 triangle intersection implementation
+        - Did not work, the previous version also suffered from the same issues
+
+    [*] Removing intersection points that are not "strictly" within a triangle
+        - This did actually end up working, but requires a very precise precision threshhold (which is hacky)
+
+Solution:
+    This ended up being a problem with rays brushing up against the edge or face of a coplaner triangle. The triangle-ray hit detection should have had checks to prevent this, but they either did not work as expected or did not cover the (literal) edge case of a ray brushing the edge of a non-coplaner triangle.
+
+    In order to prevent these types of false detections, I added a isPointInTriangle method along with a epsilon value that detects when points are within a certain percentage of the edge of a triangle. If they are, then I toss those detection points. This ended up working, but the epsilon value is VERY sensitive and also model dependant. It also did not resolve the issue where the parity of the number of hit points could end up being ODD
