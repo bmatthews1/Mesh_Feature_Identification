@@ -234,7 +234,7 @@ const DEBUG = false;
 
         if (DEBUG) console.log("total triangles before removal: " + triangles.length);
 
-        //remove degenerate triangles (triangles with one or more shared verticy)
+        //remove degenerate triangles (triangles with one or more shared vertice)
         let epsilon = 0.000001;
         let isClose = (v1, v2) => Math.abs(v1-v2) < epsilon;
         let pEqual = (p1, p2) => isClose(p1[0], p2[0]) && isClose(p1[1], p2[1]) && isClose(p1[2], p2[2]);
@@ -274,6 +274,26 @@ const DEBUG = false;
 
         //mark groups that contain triangles flagged as pockets as pockets themselves
         for (let tri of triangles.filter(tri => tri.isPocket)) gltfMeshes[tri.idx].isPocket = true;
+
+        //check for groups that are surrounded by pocket groups
+        for (let mesh of gltfMeshes){
+            if (mesh.isPocket) continue;
+
+            //adjacency file reports index stating from 1, we use staring from 0
+            let adjacency = jsonData.adjacency_graph[mesh.idx+1].map(i => parseInt(i)-1);
+
+            //check if all adjacent groups are pockets
+            let allAdjacentArePockets = true;
+            for (let idx of adjacency){
+                allAdjacentArePockets &= gltfMeshes[idx].isPocket;
+                if (!allAdjacentArePockets) break;
+            }
+
+            //if they are, mark this group as a pocket as well
+            if (allAdjacentArePockets) mesh.isPocket = true;
+        }
+
+        //color pockets blue
         for (let mesh of gltfMeshes.filter(mesh => mesh.isPocket)) mesh.color = [0, 0, 1];
         
     }

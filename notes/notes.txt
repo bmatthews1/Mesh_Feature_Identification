@@ -49,6 +49,8 @@ Problems with the chosen algorithm:
 
     In these cases, the protrusion and overhang face will get falsely identified as a pocket even if it is more of a saddle shape.
 
+    There is another issue (detailed more in false_detection_problem.txt) where there are false positives that occur due to rays brushing up against the side of non-coplaner faces. This causes triangles to be incorrectly marked as hits in the intersection stack which causes them to be marked as pockets
+
 
 Visualization:
 --------------
