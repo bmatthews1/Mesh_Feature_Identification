@@ -22,6 +22,7 @@ Create Standalone Node.js Web App:
             [ ] Click to select group in dropdown
             [*] Add controls for coloring toggles
                 [*] shaded, render-ids, showPockets
+            [ ] Add selection hover-highlighting on mouseOver for pockets on model
 
     [*] Main functionality
         [*] GLTFLoader: Map faces -> Entity Id's -> Model Index

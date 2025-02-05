@@ -164,7 +164,14 @@ const DEBUG = false;
             infoBox.appendChild(label);
             addBr(infoBox);
 
-            for (let mesh of pocket.meshes){
+            //weird hacky workaround to sort the list by name. There's some issue with the array composition that decomposition helps solve
+            let name2idx = (name) => parseInt(name.split("_").slice(-1)[0]);
+            let indexes = [...pocket.meshes.map((e, i) => [name2idx(e.name), i])].sort((a, b) => a[0]-b[0]);
+            console.log(indexes);
+            // let meshes = pocket.meshes.sort((a, b) => name2idx(a.name) - name2idx(b.name));
+
+            for (let idx of indexes){
+                let mesh = pocket.meshes[idx[1]];
                 let label2 = document.createElement("label");
                 label2.innerHTML = mesh.name;
                 label2.style.paddingLeft = "2em";
@@ -382,7 +389,9 @@ const DEBUG = false;
         //gather connected meshes and store in pocket array
         for (let mesh of gltfMeshes){
             if (!mesh.partOfGroup && mesh.isPocket){
+                mesh.partOfGroup = true;
                 let meshes = [mesh, ...getAllConnectedMeshes(mesh)];
+                console.log(meshes);
                 pockets.push(makePocket("Pocket_" + pockets.length, meshes));
             }
         }
