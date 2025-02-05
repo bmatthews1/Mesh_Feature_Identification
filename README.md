@@ -1,5 +1,5 @@
 # Feature Detection Project
----
+
 This is a project for the Hadrian feature detection programming assignment. In this assignment, the task was to identify "pockets" inside of a 3D model (presented as gltf mesh data).
 
 For this implementation, I chose to create the app in native javascript/webgl. The only external libraries used on this project were the [gltfLoader](https://github.com/johh/three-gltf-loader) from the Three.js addons library (for parsing the gltf file) and the Matrix4x4 implementation from [glMatrix](https://glmatrix.net/) (for computing projection and modelview matrices). All other code was written by hand.
@@ -33,9 +33,9 @@ The app UI is split into three areas, (1.) pocket reporting on the left, (2.) a 
 2. The model display offers basic camera controls such as tumbling and zoom which can be used by clicking and dragging the mouse across the surface of the canvas, or by using the scroll wheel.
 
 3. Finally the rendering controls on the top left allow for toggling the various render modes. These are fairly self explanatory but are provided below for completeness:
-    - showLighting: toggles headlight lighting/shading on the model
-    - showIndexColors: toggles rendering the faces with vertex color information (retrieved from the gltf model group color information)
-    - highlightPockets: toggles showing the identified pockets by highlighting them in yellow
+    - **showLighting**: toggles headlight lighting/shading on the model
+    - **showIndexColors**: toggles rendering the faces with vertex color information (retrieved from the gltf model group color information)
+    - **highlightPockets**: toggles showing the identified pockets by highlighting them in yellow
 
 ## Implementation Notes:
 
@@ -45,7 +45,9 @@ To do this, I made an implementation of the [Möller–Trumbore ray-triangle int
 
 My first implementation of this algorithm spawned rays in a dense grid along the X and Z axis' to pass them through the model. However, this required a dense sampling of rays (~500000) and was too slow for realtime performance. (this version of the app can be found in commit: `4ae3258a` - however, be fore-warned that it can take upwards of 50s to render the first image)
 
-My second implementation of this algorithm was to use the centroid of each triangle as the starting point for the ray. I then reprojected those ray points back along the X or Z axis so that they were outside of the model. This was much much faster, but I ran into issues where rays that brushed along the edges of some triangles were causing false detections and falsy flagging mesh groups as pockets. In order to get around this, I created a thresholding system where each intersection point is first tested to see if it is strictly within the face of the hit triangle to remove ray-edge collisions. This threshold value is very sensitive however, and is likely model-size dependant, so it should be refactored if this project is to be continued.
+My second implementation of this algorithm was to use the centroid of each triangle as the starting point for the ray. I then reprojected those ray points back along the X or Z axis so that they were outside of the model.
+
+This was much much faster, but I ran into issues where rays that brushed along the edges of some triangles were causing false detections and falsy flagging mesh groups as pockets. In order to get around this, I created a thresholding system where each intersection point is first tested to see if it is strictly within the face of the hit triangle to remove ray-edge collisions. This threshold value is very sensitive however, and is likely model-size dependant, so it should be refactored if this project is to be continued.
 
 Additionally, when analyzing the triangle data I found 12 degenerate triangles in the model (triangles with two or more shared points). These triangles were removed from the triangle list prior to performing the ray casting.
 
