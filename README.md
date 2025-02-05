@@ -22,11 +22,11 @@ This app requires node.js to be installed in order to run. With node.js installe
 
 You can then navigate to:
 `http://localhost:8000/`
-in your browser of your choice to view the app.
+in a browser of your choice to view the app.
 
 ## App UI Overview and Controls:
 
-The main app is split into three areas, (1.) pocket reporting on the left, (2.) a model display in the center, and (3.) rendering controls in the upper right. Launching the app wil automatically load the file and perform the raycasting pocket detection algorithm, which will then also populate the "Identified Pockets" section on the left.
+The app UI is split into three areas, (1.) pocket reporting on the left, (2.) a model display in the center, and (3.) rendering controls in the upper right. Launching the app wil automatically load the file and perform the raycasting pocket detection algorithm, which will then also populate the "Identified Pockets" section on the left.
 
 1. The text for each pocket inside of the pocket reporting area may be clicked on to expand a list of all the sub-meshes/groups that comprise the listed pocket.
 
