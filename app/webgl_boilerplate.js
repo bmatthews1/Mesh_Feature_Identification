@@ -355,6 +355,7 @@ const DEBUG = false;
         requestAnimationFrame(temp);
     }
 
+    //initializes the gl context, creates the shader programs, and constructs the buffers for render
     let startGL = (gltfMeshes) => {
         let gl = initGLContext();
 
