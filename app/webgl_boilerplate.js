@@ -275,7 +275,6 @@ const DEBUG = false;
 
         // Set the drawing position to the "identity" point, which is the center of the scene.
         const modelViewMatrix = mat4.create();
-
         translate(modelViewMatrix, [0, 0, -modelInfo.modelRadius*2]);
 
         // rotate(modelViewMatrix, rotZ, [0, 0, 1]);
@@ -284,16 +283,12 @@ const DEBUG = false;
 
         let s = zoom;
         scale(modelViewMatrix, [s, s, s]);
-
         translate(modelViewMatrix, modelInfo.modelCenter.map(i => -i));
 
         //create a normals matrix
         const normalMatrix = mat4.create();
-
         rotate(normalMatrix, rotX, [1, 0, 0]);
         rotate(normalMatrix, rotY, [0, 1, 0]);
-        // mat4.invert(normalMatrix, modelViewMatrix);
-        // mat4.transpose(normalMatrix, normalMatrix);
 
         return {projectionMatrix, modelViewMatrix, normalMatrix};
     }
@@ -304,11 +299,6 @@ const DEBUG = false;
         gl.clearDepth(1.0); // Clear everything
         gl.enable(gl.DEPTH_TEST); // Enable depth testing
         gl.depthFunc(gl.LEQUAL); // Near things obscure far things
-
-        // XXX
-        // gl.enable(gl.BLEND)
-        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-        // gl.blendEquation(gl.FUNC_ADD);
 
         // Clear the canvas before we start drawing on it.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -352,11 +342,11 @@ const DEBUG = false;
         gl.clearColor(0.0, 1.0, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-
         drawScene(gl, programInfo, buffers, numElements, shaderProg);
     }
 
 //-- Window Load ---------------------------
+    //helper function to redraw the canvas every frame (~60fps)
     let autoLoop = (f, ...function_args) => {
         let temp = () => {
             f(...function_args);

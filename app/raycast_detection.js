@@ -35,11 +35,13 @@ const DEBUG = false;
     let modelLoaded = false;
     let filesLoaded = 0;
 
+    //this function loads and parses a given gltf model from a path
     let loadModel = (path) => {
         loader.load(path, gltf => {
             let idx = 0;
             let offset = 0;
 
+            //traverse the gltf scene graph
             gltf.scene.traverse(child => {
                 if (!child.isMesh) return;
                 if (DEBUG && idx == 0) console.log(child);
@@ -64,10 +66,12 @@ const DEBUG = false;
                     isPocket : false,
                 };
 
+                //add the mesh proxy to the list of gltf meshes
                 gltfMeshes.push(meshProxy);
                 idx++;
                 offset += child.geometry.attributes.position.array.length/3;
                 
+                //update the model bounds
                 for (let i = 0; i < 6; i++){
                     let fn = i < 3 ? Math.min : Math.max;
                     modelBounds[i] = fn(modelBounds[i], meshProxy.bounds[i]);
@@ -75,19 +79,25 @@ const DEBUG = false;
             });
             if (DEBUG) console.log(gltfMeshes);
             if (DEBUG) console.log(modelBounds);
+
+            //update the model radius from the model bounds
             modelRadius = Math.hypot(modelBounds[3]-modelBounds[0], modelBounds[4]-modelBounds[1], modelBounds[5]-modelBounds[2])/2;
             modelCenter = [
                 (modelBounds[3]+modelBounds[0])/2, 
                 (modelBounds[4]+modelBounds[1])/2,
                 (modelBounds[5]+modelBounds[2])/2,
             ];
+
             if (DEBUG) console.log(modelRadius);
             if (DEBUG) console.log(modelCenter);
+
+            //flag the model as loaded
             modelLoaded = true;
             checkGLReadyState();
         });
     }
 
+    //loads the required json files from the given path
     let loadJSON = (filePath, success=emptyFn, err=emptyFn) => {
         fetch(filePath)
         .then(response => response.json())
@@ -95,6 +105,7 @@ const DEBUG = false;
         .catch(err);
     }
 
+    //loads the gltf and json data
     let loadData = () => {
         loadModel(modelPath);
         for (let file of jsonFiles){
@@ -106,12 +117,15 @@ const DEBUG = false;
         }
     }
 
+    //helper function to check if all files have been loaded
     let allFilesAreLoaded = () => {
         if (DEBUG) console.log(modelLoaded, filesLoaded);
         return modelLoaded && filesLoaded == 4;
     }
 
     //TODO replace this function with async await
+    //function that will send all the model information through the ray casting
+    //feature detection and then also to the rasterizer for rendering
     let checkGLReadyState = () => {
         if (allFilesAreLoaded()){
             console.log("all files loaded");
@@ -132,6 +146,7 @@ const DEBUG = false;
     }
 
 //-- Display Pocket Information ---------------------------
+    //populates the "Identified Pockets" area of the app
     let populatePocketInfo = (pockets) => {
         console.log(pockets);
         let infoBox = document.getElementById("infobox");
@@ -167,7 +182,6 @@ const DEBUG = false;
             //weird hacky workaround to sort the list by name. There's some issue with the array composition that decomposition helps solve
             let name2idx = (name) => parseInt(name.split("_").slice(-1)[0]);
             let indexes = [...pocket.meshes.map((e, i) => [name2idx(e.name), i])].sort((a, b) => a[0]-b[0]);
-            console.log(indexes);
             // let meshes = pocket.meshes.sort((a, b) => name2idx(a.name) - name2idx(b.name));
 
             for (let idx of indexes){
@@ -275,6 +289,7 @@ const DEBUG = false;
         return {xRays, zRays};
     }
 
+    //retrieves the triangles and metadata from the mesh data
     let getTrianglesFromGLTFMeshes = (gltfMeshes) => {
         let triangles = [];
         for (let child of gltfMeshes){
@@ -294,6 +309,7 @@ const DEBUG = false;
         return triangles;
     }
 
+    //performs the raycasting to detect pockets on the model
     let findPockets = (gltfMeshes) => {
         let triangles = getTrianglesFromGLTFMeshes(gltfMeshes);
 
@@ -357,6 +373,7 @@ const DEBUG = false;
     }
 
 //-- Building Group Information ---------------------------
+    //helper function to add adjacency information to each mesh/group
     let assignMeshGroupAdjacency = (gltfMeshes) => {
         for (let mesh of gltfMeshes){
             if (mesh.isPocket) continue;
@@ -366,6 +383,7 @@ const DEBUG = false;
         }
     }
 
+    //connects all of the flagged pocket meshes into a single pocket object then returns all found pockets
     let getPocketMetaData = (gltfMeshes) => {
         let pockets = [];
         let makePocket = (name, meshes) => ({name, meshes});
@@ -391,7 +409,7 @@ const DEBUG = false;
             if (!mesh.partOfGroup && mesh.isPocket){
                 mesh.partOfGroup = true;
                 let meshes = [mesh, ...getAllConnectedMeshes(mesh)];
-                console.log(meshes);
+                
                 pockets.push(makePocket("Pocket_" + pockets.length, meshes));
             }
         }
@@ -401,6 +419,7 @@ const DEBUG = false;
     }
 
 //-- Main ------------------------------------------
+    //main entry point for the program
     window.onload = () => {
         loadData();
     }
